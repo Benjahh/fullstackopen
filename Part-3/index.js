@@ -1,13 +1,23 @@
 const morgan = require("morgan")
-const express = require('express');
+require('dotenv').config()
+const express = require('express')
 const cors = require('cors')
 const app = express()
+const mongoose = require('mongoose')
+const Person = require('./models/person')
 
+
+
+
+
+
+
+app.use(express.static('build'))
 app.use(cors())
 app.use(express.json())
 app.use(morgan((tokens, req, res) => {
   return [
-    tokens.method(req, res),
+    tokens.method(req, res), 
     tokens.url(req, res),
     tokens.status(req, res),
     tokens.res(req, res, 'content-length'), '-',
@@ -16,28 +26,7 @@ app.use(morgan((tokens, req, res) => {
   ].join(' ')
 }))
 
-let persons = [
-        { 
-          "id": 1,
-          "name": "Arto Hellas", 
-          "number": "040-123456"
-        },
-        { 
-          "id": 2,
-          "name": "Ada Lovelace", 
-          "number": "39-44-5323523"
-        },
-        { 
-          "id": 3,
-          "name": "Dan Abramov", 
-          "number": "12-43-234345"
-        },
-        { 
-          "id": 4,
-          "name": "Mary Poppendieck", 
-          "number": "39-23-6423122"
-        }
-]
+
 
 const idGenerator = () => {
   randomId = Math.floor(Math.random() * 100) 
@@ -56,50 +45,54 @@ app.get('/info', (request, response) => {
 })
 
 app.get('/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const personFound = persons.find(person => person.id === id)
-    personFound
-    ? response.json(personFound)
-    : response.status(404).end()
-} )
+    Person.findById(request.params.id)
+    .then(person => {
+      person
+      ? response.json(person)
+      : response.status(404).end()     
+    })
+    .catch(error => {
+      console.log(error)
+      response.status(400).send({error: 'malformatted id'})
+    })   
+})
 
 app.get('/persons', (request, response) => {
-  response.json(persons)
+  Person.find({})
+  .then(person => response.json(person))
+
 })
 
 app.delete('/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    persons = persons.filter(person => person.id !== id)
-    response.status(204).end()
+    Person.findById(request.params.id)
+   
 })
 
 app.post('/persons', (request, response) => {
   body = request.body;
-  console.log(body);
+  
 
   if(!body.name || !body.number){
     return response.status(400).json({
       error: 'content is missing'
     })
   }
-    { if(persons.find(person => person.name === body.name)){
-      return response.status(400).json({
-        error: 'name already exists in database'
-      })
-    }
-    {
-      newPerson = {
+   
+    
+      const person = new Person ({
         name: body.name,
         number: body.number,
-        id: idGenerator()
-      }
-      persons = persons.concat(newPerson)
-      response.json(newPerson);
-    }
-   }
+      })
+
+      person.save()
+      .then(savedPerson => {
+        console.log('Person saved')
+        response.json(savedPerson)
+      })
+    
 
 })
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 }) 
