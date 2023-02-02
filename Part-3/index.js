@@ -27,12 +27,6 @@ app.use(morgan((tokens, req, res) => {
 }))
 
 
-
-const idGenerator = () => {
-  randomId = Math.floor(Math.random() * 100) 
-
-  return randomId
-}
 app.get('/info', (request, response) => {
     const currentTime = new Date().toLocaleString();
     const personAmount = persons.length;
@@ -44,17 +38,15 @@ app.get('/info', (request, response) => {
     </div> `)
 })
 
-app.get('/persons/:id', (request, response) => {
+app.get('/persons/:id', (request, response, next) => {
     Person.findById(request.params.id)
     .then(person => {
       person
       ? response.json(person)
       : response.status(404).end()     
     })
-    .catch(error => {
-      console.log(error)
-      response.status(400).send({error: 'malformatted id'})
-    })   
+    .catch(error => next(error))
+    
 })
 
 app.get('/persons', (request, response) => {
@@ -63,8 +55,12 @@ app.get('/persons', (request, response) => {
 
 })
 
-app.delete('/persons/:id', (request, response) => {
-    Person.findById(request.params.id)
+app.delete('/persons/:id', (request, response, next) => {
+    Person.findByIdAndRemove(request.params.id)
+    .then(result => {
+      response.status(204).end
+    })
+    .catch(error => next(error))
    
 })
 
@@ -90,8 +86,22 @@ app.post('/persons', (request, response) => {
         response.json(savedPerson)
       })
     
-
 })
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
+  }
+
+  next(error)
+}
+
+app.use(errorHandler)
+
 const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)

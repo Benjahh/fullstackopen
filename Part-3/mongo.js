@@ -20,14 +20,14 @@
   mongoose.connect(url)
 
   const personSchema = new mongoose.Schema({
-    personName: String,
-    personNumber: String,
+    name: String,
+    number: String,
   })
   
   const Person = mongoose.model('Person', personSchema)
   const person = new Person({
-    personName: newPersonName,
-    personNumber: newPhoneNumber,
+    name: newPersonName,
+    number: newPhoneNumber,
     })
 
   if(process.argv.length === 3) {
@@ -39,12 +39,13 @@
       console.log(person))
       mongoose.connection.close()
       })
+    }
 
   person.save().then(result => {
     console.log('person saved!')  
     mongoose.connection.close()
     })
-  }
+  
       
 
 
