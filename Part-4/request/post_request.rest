@@ -1,9 +1,11 @@
 POST http://localhost:3001/blogs
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImV4YW1wbGUiLCJpZCI6IjYzZTMxMjc5ODkyMjVjNTNmYmJhMDAyOSIsImlhdCI6MTY3NTgyNjkwN30.emeBSSQgYZvocde3yvHhXJhYFDV7Y8HNK8hueEA_iBg
 
 {
-    "title": "example title 1",
-    "author": "example author 1",
-    "url": "example url 1",
-    "likes": 1
+    "title":"t",
+    "author":"example",
+    "url":"u",
+    "likes":1
+    
 } 

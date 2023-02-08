@@ -6,8 +6,9 @@ const logger = require('./utils/logger')
 const mongoose = require('mongoose')
 const config = require('./utils/config')
 const middleware = require('./utils/middleware')
-
+const usersRouter = require('./controllers/user')
 const blogsRouter = require('./controllers/blog')
+const loginRouter = require('./controllers/login')
 const morgan = require('morgan')
 
 
@@ -33,7 +34,9 @@ app.use(morgan((tokens, req, res) => {
     ].join(' ')
 }))
 
-app.use('/blogs', blogsRouter )
+app.use('/login', loginRouter)
+app.use('/blogs', blogsRouter)
+app.use('/users', usersRouter)
 
 app.use(middleware.errorHandler)
 app.use(middleware.unknownEndpoint)
